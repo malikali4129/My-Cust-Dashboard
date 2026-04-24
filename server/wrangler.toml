@@ -1,0 +1,9 @@
+name = "my-cust-dashboard"
+compatibility_date = "2024-05-01"
+
+# KV Namespace binding
+# Replace id and preview_id after creating the namespace in Cloudflare Dashboard
+[[kv_namespaces]]
+binding = "DATA"
+id = "YOUR_KV_NAMESPACE_ID"
+preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"
