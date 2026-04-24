@@ -1,27 +1,36 @@
-# Premium Mobile UI Refactor — TODO
+# Project Build TODO
 
-- [x] 1. Update `server/public/dashboard.js` — add `mobileMenuOpen` state.
-- [x] 2. Update `server/public/index.html` — mobile header, drawer sidebar, quick-access category bar, responsive layout, premium glass touches.
-- [x] 3. Update `server/public/dashboard.css` — add drawer/backdrop transitions, safe-area support, press states.
-- [x] 4. Update `client/src/components/Header.jsx` — mobile-optimized sizing, premium gradient border.
-- [x] 5. Update `client/src/App.jsx` — responsive padding, safe-area bottom padding.
-- [x] 6. Update `client/src/components/Card.jsx` — mobile padding, press/active states.
-- [x] 7. Update `client/src/index.css` — safe-area env, mobile scrollbar hiding, touch feedback.
-- [x] 8. All files updated successfully.
+## Root
+- [x] Create root package.json
+- [x] Create README.md
 
-## Summary of Changes
+## Server (Cloudflare Pages + KV)
+- [x] Create server/package.json
+- [x] Create server/wrangler.toml
+- [x] Create server/functions/api/_middleware.js
+- [x] Create server/functions/api/config.js
+- [x] Create server/functions/api/data.js
+- [x] Create server/functions/api/[category].js
+- [x] Create server/functions/api/export.js
+- [x] Create server/functions/api/import.js
+- [x] Create server/public/index.html (Dashboard)
+- [x] Create server/public/dashboard.js
+- [x] Create server/public/dashboard.css
 
-### Dashboard (server/public/)
-- **Sidebar → Mobile Drawer**: Fixed sidebar now slides in from the left on mobile with a backdrop blur overlay. Closes via X button or backdrop tap.
-- **Mobile Header**: Sticky top bar with hamburger menu, current page title, item count, and Add Item button.
-- **Quick-Access Category Chips**: Horizontally scrollable pill bar below the mobile header for one-tap category switching.
-- **Premium Polish**: Gradient active states on sidebar items, larger touch targets (min 44px), mobile modal slides up from bottom (desktop stays centered), toast stretches full-width on mobile, `active:scale-95` tactile feedback on all buttons.
-- **Safe Area Support**: `viewport-fit=cover`, `env(safe-area-inset-bottom)`, and `pb-safe` classes for notched devices.
-- **Meta Tags**: Added `theme-color`, `apple-mobile-web-app-capable`, and `apple-mobile-web-app-status-bar-style` for PWA-like feel.
+## Client (React + Vite + Tailwind)
+- [x] Create client/package.json
+- [x] Create client/vite.config.js
+- [x] Create client/tailwind.config.js
+- [x] Create client/postcss.config.js
+- [x] Create client/index.html
+- [x] Create client/src/main.jsx
+- [x] Create client/src/App.jsx
+- [x] Create client/src/index.css
+- [x] Create client/src/components/Header.jsx
+- [x] Create client/src/components/Section.jsx
+- [x] Create client/src/components/Card.jsx
+- [x] Create client/.env.example
 
-### React Client (client/src/)
-- **Header.jsx**: Smaller logo and title on mobile, gradient icon background, hidden desktop-only elements on small screens.
-- **App.jsx**: Tighter mobile padding (`py-6` vs `py-12`), responsive empty state sizing, `px-4` safe margins.
-- **Card.jsx**: `active:scale-[0.98]` press feedback, responsive padding (`p-4 sm:p-5`), slightly smaller title on mobile.
-- **index.css**: Added `tap-highlight-transparent`, `pb-safe`, `scrollbar-hide`, `@media (hover: none)` active states, and mobile scrollbar hiding.
+---
 
+**Status:** ✅ All files created. Project is ready for setup.
