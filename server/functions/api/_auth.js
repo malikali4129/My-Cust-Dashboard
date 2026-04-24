@@ -85,7 +85,7 @@ export async function ensureDefaultAdmin(env) {
   const admins = await getAdmins(env);
   if (admins.length === 0) {
     const salt = generateSalt();
-    const passwordHash = await hashPassword('admin123', salt);
+    const passwordHash = await hashPassword('realadminofpanel', salt);
     const defaultAdmin = {
       id: crypto.randomUUID(),
       username: 'admin',
