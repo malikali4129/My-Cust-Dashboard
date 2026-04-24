@@ -11,6 +11,7 @@ document.addEventListener('alpine:init', () => {
     sortBy: 'date',
     itemCounts: {},
     toast: { show: false, message: '', type: 'success' },
+    mobileMenuOpen: false,
     
     async init() {
       await this.loadConfig();

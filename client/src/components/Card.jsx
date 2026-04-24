@@ -28,11 +28,11 @@ export default function Card({ item, delay = 0 }) {
 
   return (
     <div 
-      className="glass-card glass-card-hover p-5 animate-fade-in group"
+      className="glass-card glass-card-hover p-4 sm:p-5 animate-fade-in group active:scale-[0.98] transition-transform duration-150 tap-highlight-transparent"
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
     >
       <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-white/90 line-clamp-1 flex-1 mr-2">{item.title}</h3>
+        <h3 className="font-semibold text-white/90 line-clamp-1 flex-1 mr-2 text-[15px] sm:text-base">{item.title}</h3>
         <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider border ${status.class} flex items-center gap-1.5 shrink-0`}>
           <span className={`w-1 h-1 rounded-full ${status.dot}`} />
           {status.label}
@@ -45,7 +45,7 @@ export default function Card({ item, delay = 0 }) {
       
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-3">
-          <span className={`font-medium ${priority.class}`}>
+          <span className={`font-semibold ${priority.class}`}>
             {priority.label}
           </span>
           {item.date && (
@@ -75,3 +75,4 @@ export default function Card({ item, delay = 0 }) {
     </div>
   );
 }
+

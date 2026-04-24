@@ -2,7 +2,10 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Dashboard — My Cust V2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -27,63 +30,139 @@
 
   <div x-data="dashboard()" x-init="init" class="flex h-screen w-full">
 
-    <!-- Sidebar -->
-    <aside class="w-64 flex-shrink-0 bg-slate-900/80 backdrop-blur-2xl border-r border-white/10 flex flex-col">
+    <!-- Mobile Menu Backdrop -->
+    <div 
+      x-show="mobileMenuOpen" 
+      x-transition:enter="transition-opacity ease-out duration-300"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition-opacity ease-in duration-200"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+      @click="mobileMenuOpen = false"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+    ></div>
+
+    <!-- Sidebar / Mobile Drawer -->
+    <aside 
+      :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
+      class="fixed lg:static inset-y-0 left-0 z-50 w-72 lg:w-64 flex-shrink-0 bg-slate-900/95 lg:bg-slate-900/80 backdrop-blur-2xl border-r border-white/10 flex flex-col transition-transform duration-300 ease-out lg:translate-x-0"
+    >
       <div class="p-6 border-b border-white/10">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center">
-            <i data-lucide="layout-dashboard" class="w-5 h-5 text-indigo-400"></i>
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+            <i data-lucide="layout-dashboard" class="w-5 h-5 text-white"></i>
           </div>
           <div>
             <h1 class="font-bold text-lg tracking-tight text-white/90">My Cust</h1>
             <p class="text-xs text-slate-400">Admin Panel</p>
           </div>
+          <button 
+            @click="mobileMenuOpen = false" 
+            class="ml-auto lg:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-colors"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
       </div>
 
       <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        <p class="px-3 text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">Categories</p>
         <template x-for="cat in categories" :key="cat.id">
           <button 
-            @click="switchTab(cat.id)"
-            :class="currentTab === cat.id ? 'bg-white/10 text-white border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border-transparent'"
-            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 border"
+            @click="switchTab(cat.id); mobileMenuOpen = false"
+            :class="currentTab === cat.id ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/10 text-white border-indigo-500/30 shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border-transparent'"
+            class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 border"
           >
-            <i :data-lucide="cat.icon" class="w-4.5 h-4.5"></i>
+            <i :data-lucide="cat.icon" class="w-4.5 h-4.5 shrink-0"></i>
             <span class="text-sm font-medium" x-text="cat.label"></span>
             <span 
-              class="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-white/5"
+              class="ml-auto text-[10px] px-2 py-0.5 rounded-full font-semibold"
+              :class="currentTab === cat.id ? 'bg-white/15 text-white' : 'bg-white/5 text-slate-400'"
               x-text="(itemCounts[cat.id] || 0)"
             ></span>
           </button>
         </template>
 
         <div class="pt-4 mt-4 border-t border-white/10">
+          <p class="px-3 text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">Settings</p>
           <button 
-            @click="currentTab = 'manage'"
-            :class="currentTab === 'manage' ? 'bg-white/10 text-white border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border-transparent'"
-            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 border"
+            @click="switchTab('manage'); mobileMenuOpen = false"
+            :class="currentTab === 'manage' ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/10 text-white border-indigo-500/30 shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border-transparent'"
+            class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 border"
           >
-            <i data-lucide="settings" class="w-4.5 h-4.5"></i>
+            <i data-lucide="settings" class="w-4.5 h-4.5 shrink-0"></i>
             <span class="text-sm font-medium">Data Management</span>
           </button>
         </div>
       </nav>
 
       <div class="p-4 border-t border-white/10">
-        <div class="bg-white/5 backdrop-blur-md rounded-xl p-3 border border-white/10">
+        <div class="glass-panel rounded-xl p-3 border border-white/10">
           <p class="text-xs text-slate-400 mb-2">Server Status</p>
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span class="text-xs font-medium text-emerald-400">Online</span>
           </div>
         </div>
+        <p class="text-[10px] text-slate-600 mt-3 text-center">My Cust V2</p>
       </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col min-w-0">
-      <!-- Top Bar -->
-      <header class="h-16 bg-slate-900/40 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-6">
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <!-- Mobile Header -->
+      <header class="lg:hidden sticky top-0 z-30 bg-slate-950/90 backdrop-blur-xl border-b border-white/10">
+        <div class="flex items-center justify-between px-4 py-3">
+          <div class="flex items-center gap-3">
+            <button 
+              @click="mobileMenuOpen = true"
+              class="p-2.5 -ml-1 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white active:bg-white/10 transition-all tap-highlight-transparent"
+            >
+              <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div>
+              <h1 class="font-bold text-base text-white/90 leading-tight" x-text="currentTab === 'manage' ? 'Data Management' : (currentCategory?.label || 'Dashboard')"></h1>
+              <p class="text-[10px] text-slate-500" x-text="filteredItems.length + ' items'"></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <template x-if="currentTab !== 'manage'">
+              <button 
+                @click="openModal()"
+                class="flex items-center gap-1.5 bg-indigo-500 hover:bg-indigo-400 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-lg shadow-indigo-500/25 active:scale-95 tap-highlight-transparent"
+              >
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Add</span>
+              </button>
+            </template>
+          </div>
+        </div>
+
+        <!-- Quick Access Category Chips (Mobile) -->
+        <div x-show="currentTab !== 'manage' && categories.length > 0" class="px-4 pb-3 -mt-1">
+          <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 snap-x snap-mandatory">
+            <template x-for="cat in categories" :key="cat.id">
+              <button
+                @click="switchTab(cat.id)"
+                :class="currentTab === cat.id ? 'bg-indigo-500 text-white border-indigo-400 shadow-md shadow-indigo-500/25' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-slate-200'"
+                class="flex-none snap-start px-3.5 py-2 rounded-full text-xs font-medium border transition-all active:scale-95 tap-highlight-transparent flex items-center gap-1.5"
+              >
+                <i :data-lucide="cat.icon" class="w-3.5 h-3.5"></i>
+                <span x-text="cat.label"></span>
+                <span 
+                  class="text-[10px] px-1.5 py-0 rounded-full"
+                  :class="currentTab === cat.id ? 'bg-white/25' : 'bg-white/10'"
+                  x-text="itemCounts[cat.id] || 0"
+                ></span>
+              </button>
+            </template>
+          </div>
+        </div>
+      </header>
+
+      <!-- Desktop Top Bar -->
+      <header class="hidden lg:flex h-16 bg-slate-900/40 backdrop-blur-xl border-b border-white/10 items-center justify-between px-6 shrink-0">
         <div class="flex items-center gap-4 flex-1">
           <div class="relative w-96">
             <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
@@ -91,7 +170,7 @@
               x-model="search" 
               type="text" 
               placeholder="Search items..." 
-              class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
+              class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
             >
           </div>
         </div>
@@ -108,8 +187,21 @@
         </div>
       </header>
 
+      <!-- Mobile Search Bar -->
+      <div x-show="currentTab !== 'manage'" class="lg:hidden px-4 pt-4 pb-2">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+          <input 
+            x-model="search" 
+            type="text" 
+            placeholder="Search items..." 
+            class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
+          >
+        </div>
+      </div>
+
       <!-- Content Area -->
-      <div class="flex-1 overflow-y-auto p-6">
+      <div class="flex-1 overflow-y-auto p-4 lg:p-6 pb-safe">
         
         <!-- Loading -->
         <div x-show="loading" class="flex items-center justify-center h-full">
@@ -120,8 +212,8 @@
         </div>
 
         <!-- Category View -->
-        <div x-show="!loading && currentTab !== 'manage'" class="space-y-6">
-          <div class="flex items-center justify-between">
+        <div x-show="!loading && currentTab !== 'manage'" class="space-y-5 lg:space-y-6">
+          <div class="hidden lg:flex items-center justify-between">
             <div>
               <h2 class="text-2xl font-bold text-white/90" x-text="currentCategory?.label || ''"></h2>
               <p class="text-sm text-slate-400 mt-1">
@@ -137,23 +229,35 @@
             </div>
           </div>
 
+          <!-- Mobile Sort Bar -->
+          <div class="lg:hidden flex items-center justify-between">
+            <p class="text-sm text-slate-400">
+              <span x-text="filteredItems.length"></span> items
+            </p>
+            <select x-model="sortBy" class="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none">
+              <option value="date">Sort by Date</option>
+              <option value="priority">Sort by Priority</option>
+              <option value="status">Sort by Status</option>
+            </select>
+          </div>
+
           <!-- Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5">
             <template x-for="item in filteredItems" :key="item.id">
-              <div class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-lg hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer" @click="openModal(item)">
+              <div class="group bg-white/[0.03] backdrop-blur-md border border-white/[0.08] rounded-2xl p-4 lg:p-5 shadow-lg hover:bg-white/[0.06] hover:border-white/15 transition-all duration-300 cursor-pointer active:scale-[0.98] tap-highlight-transparent" @click="openModal(item)">
                 <div class="flex items-start justify-between mb-3">
-                  <h3 class="font-semibold text-white/90 line-clamp-1" x-text="item.title"></h3>
+                  <h3 class="font-semibold text-white/90 line-clamp-1 text-[15px] lg:text-base" x-text="item.title"></h3>
                   <span 
                     :class="{
-                      'bg-emerald-500/20 text-emerald-300': item.status === 'active',
-                      'bg-blue-500/20 text-blue-300': item.status === 'completed',
-                      'bg-slate-500/20 text-slate-300': item.status === 'archived'
+                      'bg-emerald-500/15 text-emerald-300 border-emerald-500/20': item.status === 'active',
+                      'bg-blue-500/15 text-blue-300 border-blue-500/20': item.status === 'completed',
+                      'bg-slate-500/15 text-slate-300 border-slate-500/20': item.status === 'archived'
                     }"
-                    class="text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider"
+                    class="text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider border shrink-0 ml-2"
                     x-text="item.status"
                   ></span>
                 </div>
-                <p class="text-sm text-slate-400 line-clamp-3 mb-4" x-text="item.content || 'No description'"></p>
+                <p class="text-sm text-slate-400 line-clamp-3 mb-4 leading-relaxed" x-text="item.content || 'No description'"></p>
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
                     <span 
@@ -162,7 +266,7 @@
                         'text-amber-400': item.priority === 'medium',
                         'text-slate-400': item.priority === 'low'
                       }"
-                      class="text-xs font-medium"
+                      class="text-xs font-semibold"
                       x-text="(item.priority || 'medium') + ' priority'"
                     ></span>
                   </div>
@@ -179,7 +283,9 @@
 
           <!-- Empty State -->
           <div x-show="!loading && filteredItems.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-500">
-            <i data-lucide="inbox" class="w-12 h-12 mb-4 opacity-50"></i>
+            <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
+              <i data-lucide="inbox" class="w-8 h-8 opacity-50"></i>
+            </div>
             <p class="text-lg font-medium">No items found</p>
             <p class="text-sm mt-1">Add your first item to get started</p>
           </div>
@@ -192,9 +298,9 @@
             <p class="text-sm text-slate-400 mt-1">Export, import, and configure categories</p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5">
             <!-- Export -->
-            <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
+            <div class="bg-white/[0.03] backdrop-blur-md border border-white/[0.08] rounded-2xl p-5 lg:p-6 hover:border-white/15 transition-all">
               <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                   <i data-lucide="download" class="w-5 h-5 text-emerald-400"></i>
@@ -207,7 +313,7 @@
               <a 
                 href="/api/export" 
                 download
-                class="inline-flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                class="inline-flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-4 py-2.5 rounded-xl text-sm font-medium transition-all active:scale-95 tap-highlight-transparent"
               >
                 <i data-lucide="download" class="w-4 h-4"></i>
                 Download Backup
@@ -215,7 +321,7 @@
             </div>
 
             <!-- Import -->
-            <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
+            <div class="bg-white/[0.03] backdrop-blur-md border border-white/[0.08] rounded-2xl p-5 lg:p-6 hover:border-white/15 transition-all">
               <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
                   <i data-lucide="upload" class="w-5 h-5 text-amber-400"></i>
@@ -229,13 +335,13 @@
                 type="file" 
                 accept=".json" 
                 @change="handleImport($event)"
-                class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-amber-500/20 file:text-amber-300 hover:file:bg-amber-500/30 transition-all"
+                class="block w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-amber-500/20 file:text-amber-300 hover:file:bg-amber-500/30 transition-all"
               >
             </div>
           </div>
 
           <!-- Categories Config -->
-          <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
+          <div class="bg-white/[0.03] backdrop-blur-md border border-white/[0.08] rounded-2xl p-5 lg:p-6">
             <div class="flex items-center justify-between mb-4">
               <div>
                 <h3 class="font-semibold text-white/90">Categories</h3>
@@ -243,7 +349,7 @@
               </div>
               <button 
                 @click="addCategory()"
-                class="flex items-center gap-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded-lg text-sm transition-all"
+                class="flex items-center gap-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded-lg text-sm transition-all active:scale-95 tap-highlight-transparent"
               >
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 Add
@@ -252,12 +358,12 @@
             <div class="space-y-2">
               <template x-for="(cat, index) in categories" :key="cat.id">
                 <div class="flex items-center gap-3 bg-white/5 rounded-xl p-3 border border-white/5">
-                  <input x-model="cat.label" class="flex-1 bg-transparent text-sm text-slate-200 focus:outline-none" placeholder="Label">
-                  <input x-model="cat.icon" class="w-24 bg-transparent text-sm text-slate-400 focus:outline-none" placeholder="Icon">
-                  <input x-model="cat.color" class="w-24 bg-transparent text-sm text-slate-400 focus:outline-none" placeholder="Color">
+                  <input x-model="cat.label" class="flex-1 bg-transparent text-sm text-slate-200 focus:outline-none min-w-0" placeholder="Label">
+                  <input x-model="cat.icon" class="w-20 lg:w-24 bg-transparent text-sm text-slate-400 focus:outline-none" placeholder="Icon">
+                  <input x-model="cat.color" class="w-20 lg:w-24 bg-transparent text-sm text-slate-400 focus:outline-none" placeholder="Color">
                   <button 
                     @click="removeCategory(index)"
-                    class="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-500/10 transition-all"
+                    class="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-500/10 transition-all active:scale-95 tap-highlight-transparent shrink-0"
                   >
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                   </button>
@@ -266,7 +372,7 @@
             </div>
             <button 
               @click="saveConfig()"
-              class="mt-4 bg-indigo-500/80 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all"
+              class="mt-4 bg-indigo-500/80 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/20 active:scale-95 tap-highlight-transparent"
             >
               Save Configuration
             </button>
@@ -284,38 +390,38 @@
       x-transition:leave="transition ease-in duration-150"
       x-transition:leave-start="opacity-100"
       x-transition:leave-end="opacity-0"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm"
       @click.self="closeModal()"
     >
       <div 
         x-show="modalOpen"
         x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 scale-95"
-        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
         x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95"
-        class="bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl w-full max-w-lg"
+        x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+        x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+        class="bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto"
       >
-        <div class="flex items-center justify-between p-5 border-b border-white/10">
+        <div class="flex items-center justify-between p-5 border-b border-white/10 sticky top-0 bg-slate-900/95 backdrop-blur-xl rounded-t-2xl z-10">
           <h3 class="font-semibold text-white/90" x-text="editingItem ? 'Edit Item' : 'Add Item'"></h3>
-          <button @click="closeModal()" class="text-slate-400 hover:text-white transition-colors">
+          <button @click="closeModal()" class="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5 active:scale-95 tap-highlight-transparent">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
         <div class="p-5 space-y-4">
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1.5">Title</label>
-            <input x-model="formData.title" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50" placeholder="Enter title">
+            <input x-model="formData.title" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50" placeholder="Enter title">
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1.5">Content</label>
-            <textarea x-model="formData.content" rows="3" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 resize-none" placeholder="Enter description"></textarea>
+            <textarea x-model="formData.content" rows="3" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 resize-none" placeholder="Enter description"></textarea>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-medium text-slate-400 mb-1.5">Status</label>
-              <select x-model="formData.status" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none">
+              <select x-model="formData.status" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
                 <option value="active">Active</option>
                 <option value="completed">Completed</option>
                 <option value="archived">Archived</option>
@@ -323,7 +429,7 @@
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-400 mb-1.5">Priority</label>
-              <select x-model="formData.priority" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none">
+              <select x-model="formData.priority" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -332,19 +438,19 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1.5">Tags (comma separated)</label>
-            <input x-model="formData.tags" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50" placeholder="urgent, homework, etc">
+            <input x-model="formData.tags" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50" placeholder="urgent, homework, etc">
           </div>
         </div>
         <div class="flex items-center justify-end gap-3 p-5 border-t border-white/10">
           <button 
             @click="closeModal()" 
-            class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            class="px-5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all active:scale-95 tap-highlight-transparent"
           >
             Cancel
           </button>
           <button 
             @click="saveItem()" 
-            class="bg-indigo-500/80 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/20"
+            class="bg-indigo-500/80 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/20 active:scale-95 tap-highlight-transparent"
           >
             <span x-text="editingItem ? 'Update' : 'Create'"></span>
           </button>
@@ -355,8 +461,13 @@
     <!-- Toast -->
     <div 
       x-show="toast.show"
-      x-transition
-      class="fixed bottom-6 right-6 z-50 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 shadow-2xl flex items-center gap-3"
+      x-transition:enter="transition ease-out duration-200"
+      x-transition:enter-start="opacity-0 translate-y-2"
+      x-transition:enter-end="opacity-100 translate-y-0"
+      x-transition:leave="transition ease-in duration-150"
+      x-transition:leave-start="opacity-100 translate-y-0"
+      x-transition:leave-end="opacity-0 translate-y-2"
+      class="fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 z-50 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 shadow-2xl flex items-center gap-3"
     >
       <span :class="toast.type === 'success' ? 'text-emerald-400' : 'text-rose-400'">
         <i :data-lucide="toast.type === 'success' ? 'check-circle' : 'alert-circle'" class="w-5 h-5"></i>
@@ -368,3 +479,4 @@
   <script src="/dashboard.js"></script>
 </body>
 </html>
+
