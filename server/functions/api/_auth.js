@@ -139,7 +139,8 @@ export async function requireAuth(context) {
     };
   }
   
-  return { admin: { ...payload, ...admin }, error: null };
+  return { admin: { id: admin.id, username: admin.username, role: admin.role }, error: null };
+
 }
 
 export async function requireSuperAdmin(context) {

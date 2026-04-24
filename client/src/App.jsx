@@ -18,7 +18,26 @@ function App() {
   const fetchData = async () => {
     try {
       const res = await fetch(`${API_URL}/api/data`)
-      if (!res.ok) throw new Error('Failed to fetch data')
+      const contentType = res.headers.get('content-type') || ''
+      
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status} ${res.statusText}`)
+      }
+      
+      if (!contentType.includes('application/json')) {
+        const text = await res.text()
+        if (text.trim().startsWith('<')) {
+          throw new Error(
+            `Received HTML instead of JSON. This usually means:\n` +
+            `1. The API URL is wrong or missing "https://"\n` +
+            `2. The server is not running\n` +
+            `3. The server route is not configured\n\n` +
+            `Current API_URL: ${API_URL}`
+          )
+        }
+        throw new Error(`Expected JSON but received ${contentType}`)
+      }
+      
       const json = await res.json()
       setData(json)
       setError(null)
@@ -28,6 +47,7 @@ function App() {
       setLoading(false)
     }
   }
+
 
   if (loading) {
     return (
@@ -50,7 +70,8 @@ function App() {
             </svg>
           </div>
           <h2 className="text-lg font-semibold text-white/90 mb-2">Connection Error</h2>
-          <p className="text-sm text-slate-400 mb-4">{error}</p>
+            <p className="text-sm text-slate-400 mb-4" style={{ whiteSpace: 'pre-wrap' }}>{error}</p>
+
           <button 
             onClick={() => { setLoading(true); fetchData() }}
             className="bg-indigo-500/80 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition"
