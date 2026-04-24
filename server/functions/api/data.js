@@ -1,12 +1,20 @@
 export async function onRequestGet(context) {
   const { env } = context;
   try {
-    const config = await env.DATA.get('config', { type: 'json' }) || { categories: [] };
-    const result = { config, data: {} };
-    for (const cat of config.categories) {
-      result.data[cat.id] = await env.DATA.get(`data:${cat.id}`, { type: 'json' }) || [];
+    const config = await env.DATA.get('config', { type: 'json' });
+    if (!config) {
+      return new Response(JSON.stringify({ config: { categories: [] }, data: {} }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
-    return new Response(JSON.stringify(result), {
+    
+    const data = {};
+    for (const cat of config.categories) {
+      const items = await env.DATA.get(`data:${cat.id}`, { type: 'json' });
+      data[cat.id] = items || [];
+    }
+    
+    return new Response(JSON.stringify({ config, data }), {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (err) {

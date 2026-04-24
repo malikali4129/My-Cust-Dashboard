@@ -6,8 +6,6 @@ const DEFAULT_CONFIG = {
   ]
 };
 
-import { requireAuth, logActivity } from './_auth.js';
-
 export async function onRequestGet(context) {
   const { env } = context;
   try {
@@ -30,12 +28,10 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPut(context) {
-  const { admin, error } = await requireAuth(context);
-  if (error) return error;
-  
   const { env, request } = context;
   try {
     const body = await request.json();
+    // Validate basic structure
     if (!body.categories || !Array.isArray(body.categories)) {
       return new Response(JSON.stringify({ error: 'Invalid config: categories array required' }), {
         status: 400,
@@ -43,7 +39,6 @@ export async function onRequestPut(context) {
       });
     }
     await env.DATA.put('config', JSON.stringify(body));
-    await logActivity(env, 'UPDATE_CONFIG', 'config', admin.id, admin.username, { categoryCount: body.categories.length });
     return new Response(JSON.stringify({ success: true, config: body }), {
       headers: { 'Content-Type': 'application/json' }
     });
