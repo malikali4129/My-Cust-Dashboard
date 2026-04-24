@@ -2,20 +2,32 @@ import { useState, useEffect } from 'react'
 import Header from './components/Header'
 import Section from './components/Section'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8788'
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8788').replace(/\/$/, '')
+
 
 function App() {
   const [data, setData] = useState({ config: { categories: [] }, data: {} })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const checkHealth = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/health`)
+      if (!res.ok) console.warn('Health check failed:', res.status)
+    } catch (err) {
+      console.warn('Server not reachable:', err.message)
+    }
+  }
+
   useEffect(() => {
+    checkHealth()
     fetchData()
     const interval = setInterval(fetchData, 30000)
     return () => clearInterval(interval)
   }, [])
 
   const fetchData = async () => {
+
     try {
       const res = await fetch(`${API_URL}/api/data`)
       const contentType = res.headers.get('content-type') || ''
@@ -28,12 +40,14 @@ function App() {
         const text = await res.text()
         if (text.trim().startsWith('<')) {
           throw new Error(
-            `Received HTML instead of JSON. This usually means:\n` +
-            `1. The API URL is wrong or missing "https://"\n` +
-            `2. The server is not running\n` +
-            `3. The server route is not configured\n\n` +
+            `Received HTML instead of JSON. Common causes:\n` +
+            `1. API URL misconfigured (must include https://, no trailing slash)\n` +
+            `2. Cloudflare Pages root directory not set to "server/"\n` +
+            `3. KV namespace not created/bound in Cloudflare Dashboard\n` +
+            `4. Server Functions not deployed\n\n` +
             `Current API_URL: ${API_URL}`
           )
+
         }
         throw new Error(`Expected JSON but received ${contentType}`)
       }

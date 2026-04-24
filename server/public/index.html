@@ -203,10 +203,11 @@
                   <p class="text-xs text-slate-400">Download full JSON backup</p>
                 </div>
               </div>
-              <a href="/api/export" download class="inline-flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-4 py-2 rounded-xl text-sm font-medium transition-all">
-                <i data-lucide="download" class="w-4 h-4"></i>
-                Download Backup
-              </a>
+            <button @click="handleExport()" class="inline-flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-4 py-2 rounded-xl text-sm font-medium transition-all">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              Download Backup
+            </button>
+
             </div>
             <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
               <div class="flex items-center gap-3 mb-4">

@@ -322,7 +322,31 @@ document.addEventListener('alpine:init', () => {
     },
     
     // ─── Export / Import ───
+    async handleExport() {
+      try {
+        const res = await fetch('/api/export', { headers: { 'Authorization': `Bearer ${this.token}` } });
+        if (!res.ok) {
+          const data = await res.json();
+          this.showToast(data.error || 'Export failed', 'error');
+          return;
+        }
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dashboard-backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.showToast('Backup downloaded');
+      } catch (e) {
+        this.showToast('Export failed: ' + e.message, 'error');
+      }
+    },
+    
     async handleImport(event) {
+
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
