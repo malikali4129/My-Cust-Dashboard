@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import Header from './components/Header'
 import Section from './components/Section'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8788'
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8788').replace(/\/$/, '')
+
 
 function App() {
   const [data, setData] = useState({ config: { categories: [] }, data: {} })
@@ -11,14 +12,21 @@ function App() {
 
   useEffect(() => {
     fetch(`${API_URL}/api/data`)
-      .then(r => {
-        if (!r.ok) throw new Error('Failed to fetch data')
+      .then(async r => {
+        const contentType = r.headers.get('content-type') || ''
+        if (!r.ok || !contentType.includes('application/json')) {
+          const text = await r.text()
+          const preview = text.replace(/<[^>]*>/g, '').slice(0, 120)
+          throw new Error(`Server returned HTTP ${r.status} (expected JSON). Response preview: ${preview}`)
+        }
         return r.json()
       })
       .then(setData)
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
+
+
 
   if (loading) {
     return (
