@@ -31,11 +31,6 @@ const iconMap = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
   ),
-  archive: (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-    </svg>
-  ),
   folder: (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -43,14 +38,14 @@ const iconMap = {
   ),
 };
 
-export default function Section({ category, items, subjects, isExpanded, onToggle, onItemClick, onItemDelete, delay = 0 }) {
+export default function Section({ category, items, subjects, isExpanded, onToggle, onItemClick }) {
   const colorClass = colorMap[category.color] || colorMap.slate;
   const icon = iconMap[category.icon] || iconMap.folder;
 
   const getSubject = (subjectId) => subjects.find(s => s.id === subjectId);
 
   return (
-    <section className="animate-slide-up" style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}>
+    <section className="animate-slide-up">
       {/* Section Header */}
       <button
         onClick={onToggle}
@@ -85,7 +80,6 @@ export default function Section({ category, items, subjects, isExpanded, onToggl
                   item={item}
                   subject={getSubject(item.subjectId)}
                   onClick={() => onItemClick(item)}
-                  onDelete={onItemDelete ? () => onItemDelete(item.id) : undefined}
                   delay={idx * 50}
                 />
               ))}

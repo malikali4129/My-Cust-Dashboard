@@ -16,7 +16,6 @@ function App() {
   const [error, setError] = useState(null)
   const [expandedCategories, setExpandedCategories] = useState({})
   const [selectedItem, setSelectedItem] = useState(null)
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null)
   const [showHistory, setShowHistory] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(null)
   const [isSyncing, setIsSyncing] = useState(false)
@@ -38,6 +37,7 @@ function App() {
       setLastUpdated(new Date())
       setError(null)
 
+      // Auto-expand first category on initial desktop load only
       if (!hasInitialized.current && payload.config?.categories?.length > 0) {
         hasInitialized.current = true
         if (window.innerWidth >= 768) {
@@ -52,18 +52,25 @@ function App() {
     }
   }, [])
 
+  // Initial load
   useEffect(() => {
     fetchData(false)
   }, [fetchData])
 
+  // Polling every 30 seconds
   useEffect(() => {
-    const interval = setInterval(() => fetchData(true), 30000)
+    const interval = setInterval(() => {
+      fetchData(true)
+    }, 30000)
     return () => clearInterval(interval)
   }, [fetchData])
 
+  // Refetch when tab becomes visible
   useEffect(() => {
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') fetchData(true)
+      if (document.visibilityState === 'visible') {
+        fetchData(true)
+      }
     }
     document.addEventListener('visibilitychange', handleVisibility)
     return () => document.removeEventListener('visibilitychange', handleVisibility)
@@ -76,23 +83,6 @@ function App() {
   const getSubject = (subjectId) => {
     return data.config?.subjects?.find(s => s.id === subjectId)
   }
-
-  const handleItemClick = (item, categoryId) => {
-    setSelectedItem(item)
-    setSelectedCategoryId(categoryId)
-  }
-
-  const handleDeleteItem = useCallback(async (itemId, categoryId) => {
-    if (!confirm('Are you sure you want to delete this item?')) return
-    try {
-      const res = await fetch(`${API_URL}/api/${categoryId}?id=${itemId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Delete failed')
-      fetchData(true)
-      setSelectedItem(null)
-    } catch (err) {
-      alert('Error deleting: ' + err.message)
-    }
-  }, [fetchData])
 
   const categories = data.config?.categories || []
 
@@ -161,6 +151,7 @@ function App() {
                   onToggle={() => toggleCategory(cat.id)}
                 />
               ))}
+              {/* History Card for Assignments */}
               {data.history?.assignments?.length > 0 && (
                 <button
                   onClick={() => setShowHistory(!showHistory)}
@@ -186,8 +177,7 @@ function App() {
                 subjects={data.config.subjects || []}
                 isExpanded={true}
                 onToggle={() => setShowHistory(false)}
-                onItemClick={(item) => handleItemClick(item, 'assignments')}
-                onItemDelete={(itemId) => handleDeleteItem(itemId, 'assignments')}
+                onItemClick={setSelectedItem}
               />
             )}
 
@@ -200,8 +190,7 @@ function App() {
                 subjects={data.config.subjects || []}
                 isExpanded={!!expandedCategories[category.id]}
                 onToggle={() => toggleCategory(category.id)}
-                onItemClick={(item) => handleItemClick(item, category.id)}
-                onItemDelete={(itemId) => handleDeleteItem(itemId, category.id)}
+                onItemClick={setSelectedItem}
                 delay={index * 100}
               />
             ))}
@@ -214,9 +203,7 @@ function App() {
         <ItemDetailModal
           item={selectedItem}
           subject={getSubject(selectedItem.subjectId)}
-          categoryId={selectedCategoryId}
           onClose={() => setSelectedItem(null)}
-          onDelete={(itemId, catId) => handleDeleteItem(itemId, catId)}
         />
       )}
 

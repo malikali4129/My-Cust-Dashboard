@@ -207,6 +207,9 @@ document.addEventListener('alpine:init', () => {
         await this.saveConfig();
         await this.loadConfig();
         await this.loadAllCounts();
+        if (this.currentTab === 'manage') {
+          this.currentTab = this.categories[0]?.id || null;
+        }
       }
     },
 
@@ -221,6 +224,9 @@ document.addEventListener('alpine:init', () => {
         });
         this.showToast('Configuration saved');
         await this.loadConfig();
+        if (this.currentTab === 'manage') {
+          this.currentTab = this.categories[0]?.id || null;
+        }
       } catch (e) {
         this.showToast('Error saving config', 'error');
       } finally {
