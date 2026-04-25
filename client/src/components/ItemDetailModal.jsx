@@ -10,7 +10,7 @@ const priorityConfig = {
   low: { label: 'Low', class: 'text-slate-400' },
 };
 
-export default function ItemDetailModal({ item, subject, onClose }) {
+export default function ItemDetailModal({ item, subject, categoryId, onClose, onDelete }) {
   if (!item) return null;
 
   const status = statusConfig[item.status] || statusConfig.active;
@@ -18,6 +18,12 @@ export default function ItemDetailModal({ item, subject, onClose }) {
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
+  };
+
+  const handleDelete = () => {
+    if (onDelete && categoryId) {
+      onDelete(item.id, categoryId);
+    }
   };
 
   return (
@@ -35,14 +41,27 @@ export default function ItemDetailModal({ item, subject, onClose }) {
             </span>
             <span className={`text-xs font-medium ${priority.class}`}>{priority.label} Priority</span>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            {onDelete && categoryId && (
+              <button
+                onClick={handleDelete}
+                className="p-2 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 transition-all"
+                title="Delete"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Body */}

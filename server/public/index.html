@@ -151,20 +151,29 @@
           <!-- Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             <template x-for="item in filteredItems" :key="item.id">
-              <div class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-lg hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer" @click="openModal(item)">
+              <div class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-lg hover:bg-white/10 hover:border-white/20 transition-all duration-300 relative">
                 <div class="flex items-start justify-between mb-3">
-                  <h3 class="font-semibold text-white/90 line-clamp-1" x-text="item.title"></h3>
-                  <span 
-                    :class="{
-                      'bg-emerald-500/20 text-emerald-300': item.status === 'active',
-                      'bg-blue-500/20 text-blue-300': item.status === 'completed',
-                      'bg-slate-500/20 text-slate-300': item.status === 'archived'
-                    }"
-                    class="text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider"
-                    x-text="item.status"
-                  ></span>
+                  <h3 class="font-semibold text-white/90 line-clamp-1 cursor-pointer" @click="openModal(item)" x-text="item.title"></h3>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span 
+                      :class="{
+                        'bg-emerald-500/20 text-emerald-300': item.status === 'active',
+                        'bg-blue-500/20 text-blue-300': item.status === 'completed',
+                        'bg-slate-500/20 text-slate-300': item.status === 'archived'
+                      }"
+                      class="text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider"
+                      x-text="item.status"
+                    ></span>
+                    <button 
+                      @click.stop="deleteItem(item.id)"
+                      class="opacity-0 group-hover:opacity-100 text-rose-400 hover:text-rose-300 p-1 rounded-lg hover:bg-rose-500/10 transition-all"
+                      title="Delete"
+                    >
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
                 </div>
-                <p class="text-sm text-slate-400 line-clamp-3 mb-4" x-text="item.content || 'No description'"></p>
+                <p class="text-sm text-slate-400 line-clamp-3 mb-4 cursor-pointer" @click="openModal(item)" x-text="item.content || 'No description'"></p>
                 
                 <div x-show="item.subjectId" class="mb-3">
                   <span class="text-[11px] px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20" x-text="subjectName(item.subjectId)"></span>
