@@ -16,6 +16,7 @@ document.addEventListener('alpine:init', () => {
     toast: { show: false, message: '', type: 'success' },
     newSubject: { name: '', code: '' },
     showHistory: false,
+    saving: false,
 
     async init() {
       await this.loadConfig();
@@ -192,18 +193,29 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    addCategory() {
+    async addCategory() {
       const id = 'cat_' + Math.random().toString(36).substr(2, 6);
       this.categories.push({ id, label: 'New Category', icon: 'folder', color: 'slate' });
+      await this.saveConfig();
+      await this.loadConfig();
+      await this.loadAllCounts();
     },
 
-    removeCategory(index) {
+    async removeCategory(index) {
       if (confirm('Delete this category? Its data will be orphaned in KV.')) {
         this.categories.splice(index, 1);
+        await this.saveConfig();
+        await this.loadConfig();
+        await this.loadAllCounts();
+        if (this.currentTab === 'manage') {
+          this.currentTab = this.categories[0]?.id || null;
+        }
       }
     },
 
     async saveConfig() {
+      if (this.saving) return;
+      this.saving = true;
       try {
         await fetch('/api/config', {
           method: 'PUT',
@@ -217,10 +229,12 @@ document.addEventListener('alpine:init', () => {
         }
       } catch (e) {
         this.showToast('Error saving config', 'error');
+      } finally {
+        this.saving = false;
       }
     },
 
-    addSubject() {
+    async addSubject() {
       if (!this.newSubject.name || !this.newSubject.code) {
         this.showToast('Subject name and code are required', 'error');
         return;
@@ -231,11 +245,13 @@ document.addEventListener('alpine:init', () => {
         code: this.newSubject.code
       });
       this.newSubject = { name: '', code: '' };
+      await this.saveConfig();
     },
 
-    removeSubject(index) {
+    async removeSubject(index) {
       if (confirm('Delete this subject?')) {
         this.subjects.splice(index, 1);
+        await this.saveConfig();
       }
     },
 

@@ -270,17 +270,18 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs font-medium text-slate-400 mb-1.5">Program</label>
-                <input x-model="semester.program" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="BBA">
+                <input x-model="semester.program" @change="saveConfig()" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="BBA">
               </div>
               <div>
                 <label class="block text-xs font-medium text-slate-400 mb-1.5">Semester Number</label>
-                <input x-model="semester.semester" type="number" min="1" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="1">
+                <input x-model="semester.semester" @change="saveConfig()" type="number" min="1" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="1">
               </div>
               <div>
                 <label class="block text-xs font-medium text-slate-400 mb-1.5">Display Label</label>
-                <input x-model="semester.label" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="BBA - Semester 1">
+                <input x-model="semester.label" @change="saveConfig()" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="BBA - Semester 1">
               </div>
             </div>
+            <p class="text-[11px] text-slate-500 mt-2">Changes save automatically when you leave each field.</p>
           </div>
 
           <!-- Subjects Config -->
@@ -349,9 +350,9 @@
             <div class="space-y-2">
               <template x-for="(cat, index) in categories" :key="cat.id">
                 <div class="flex items-center gap-3 bg-white/5 rounded-xl p-3 border border-white/5">
-                  <input x-model="cat.label" class="flex-1 bg-transparent text-sm text-slate-200 focus:outline-none" placeholder="Label">
-                  <input x-model="cat.icon" class="w-24 bg-transparent text-sm text-slate-400 focus:outline-none" placeholder="Icon">
-                  <input x-model="cat.color" class="w-24 bg-transparent text-sm text-slate-400 focus:outline-none" placeholder="Color">
+                  <input x-model="cat.label" @change="saveConfig()" class="flex-1 bg-transparent text-sm text-slate-200 focus:outline-none" placeholder="Label">
+                  <input x-model="cat.icon" @change="saveConfig()" class="w-24 bg-transparent text-sm text-slate-400 focus:outline-none" placeholder="Icon">
+                  <input x-model="cat.color" @change="saveConfig()" class="w-24 bg-transparent text-sm text-slate-400 focus:outline-none" placeholder="Color">
                   <button 
                     @click="removeCategory(index)"
                     class="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-500/10 transition-all"

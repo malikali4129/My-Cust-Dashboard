@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Header from './components/Header'
 import Section from './components/Section'
 import CategorySummaryCard from './components/CategorySummaryCard'
@@ -17,29 +17,64 @@ function App() {
   const [expandedCategories, setExpandedCategories] = useState({})
   const [selectedItem, setSelectedItem] = useState(null)
   const [showHistory, setShowHistory] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState(null)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const hasInitialized = useRef(false)
 
-  useEffect(() => {
-    fetch(`${API_URL}/api/data`)
-      .then(async r => {
-        const contentType = r.headers.get('content-type') || ''
-        if (!r.ok || !contentType.includes('application/json')) {
-          const text = await r.text()
-          const preview = text.replace(/<[^>]*>/g, '').slice(0, 120)
-          throw new Error(`Server returned HTTP ${r.status} (expected JSON). Response preview: ${preview}`)
+  const fetchData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
+    if (silent) setIsSyncing(true)
+    try {
+      const res = await fetch(`${API_URL}/api/data`)
+      const contentType = res.headers.get('content-type') || ''
+      if (!res.ok || !contentType.includes('application/json')) {
+        const text = await res.text()
+        const preview = text.replace(/<[^>]*>/g, '').slice(0, 120)
+        throw new Error(`Server returned HTTP ${res.status} (expected JSON). Response preview: ${preview}`)
+      }
+      const payload = await res.json()
+      setData(payload)
+      setLastUpdated(new Date())
+      setError(null)
+
+      // Auto-expand first category on initial desktop load only
+      if (!hasInitialized.current && payload.config?.categories?.length > 0) {
+        hasInitialized.current = true
+        if (window.innerWidth >= 768) {
+          setExpandedCategories({ [payload.config.categories[0].id]: true })
         }
-        return r.json()
-      })
-      .then(payload => {
-        setData(payload)
-        // Expand first category by default on desktop
-        const firstCat = payload.config?.categories?.[0]?.id
-        if (firstCat && window.innerWidth >= 768) {
-          setExpandedCategories({ [firstCat]: true })
-        }
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
+      }
+    } catch (err) {
+      if (!silent) setError(err.message)
+    } finally {
+      if (!silent) setLoading(false)
+      if (silent) setIsSyncing(false)
+    }
   }, [])
+
+  // Initial load
+  useEffect(() => {
+    fetchData(false)
+  }, [fetchData])
+
+  // Polling every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchData(true)
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [fetchData])
+
+  // Refetch when tab becomes visible
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchData(true)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [fetchData])
 
   const toggleCategory = (catId) => {
     setExpandedCategories(prev => ({ ...prev, [catId]: !prev[catId] }))
@@ -50,9 +85,6 @@ function App() {
   }
 
   const categories = data.config?.categories || []
-  const activeCategories = useMemo(() => {
-    return categories.filter(cat => cat.id !== 'assignments' || !showHistory)
-  }, [categories, showHistory])
 
   if (loading) {
     return (
@@ -76,7 +108,16 @@ function App() {
           </div>
           <h2 className="text-lg font-semibold text-white/90 mb-2">Connection Error</h2>
           <p className="text-sm text-slate-400 mb-4">{error}</p>
-          <p className="text-xs text-slate-500">Make sure the server is running at {API_URL}</p>
+          <button
+            onClick={() => fetchData(false)}
+            className="inline-flex items-center gap-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Retry
+          </button>
+          <p className="text-xs text-slate-500 mt-4">Make sure the server is running at {API_URL}</p>
         </div>
       </div>
     )
@@ -84,7 +125,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100">
-      <Header config={data.config} />
+      <Header config={data.config} lastUpdated={lastUpdated} isSyncing={isSyncing} />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {categories.length === 0 ? (
@@ -167,8 +208,13 @@ function App() {
       )}
 
       <footer className="border-t border-white/5 py-6 mt-12">
-        <div className="max-w-6xl mx-auto px-6 text-center">
+        <div className="max-w-6xl mx-auto px-6 text-center space-y-1">
           <p className="text-xs text-slate-500">My Cust V2 — Auto-synced from Server</p>
+          {lastUpdated && (
+            <p className="text-[10px] text-slate-600">
+              Last updated: {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </p>
+          )}
         </div>
       </footer>
     </div>

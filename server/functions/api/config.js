@@ -17,17 +17,38 @@ const DEFAULT_CONFIG = {
   ]
 };
 
+function migrateConfig(config) {
+  let changed = false;
+  if (!config.semester) {
+    config.semester = { ...DEFAULT_CONFIG.semester };
+    changed = true;
+  }
+  if (!config.subjects || !Array.isArray(config.subjects)) {
+    config.subjects = [...DEFAULT_CONFIG.subjects];
+    changed = true;
+  }
+  if (!config.categories || !Array.isArray(config.categories)) {
+    config.categories = [...DEFAULT_CONFIG.categories];
+    changed = true;
+  }
+  return { config, changed };
+}
+
 export async function onRequestGet(context) {
   const { env } = context;
   try {
-    const config = await env.DATA.get('config', { type: 'json' });
+    let config = await env.DATA.get('config', { type: 'json' });
     if (!config) {
       await env.DATA.put('config', JSON.stringify(DEFAULT_CONFIG));
       return new Response(JSON.stringify(DEFAULT_CONFIG), {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    return new Response(JSON.stringify(config), {
+    const migrated = migrateConfig(config);
+    if (migrated.changed) {
+      await env.DATA.put('config', JSON.stringify(migrated.config));
+    }
+    return new Response(JSON.stringify(migrated.config), {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (err) {
@@ -48,8 +69,14 @@ export async function onRequestPut(context) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    await env.DATA.put('config', JSON.stringify(body));
-    return new Response(JSON.stringify({ success: true, config: body }), {
+    // Ensure new fields are always present
+    const payload = {
+      categories: body.categories,
+      subjects: Array.isArray(body.subjects) ? body.subjects : [],
+      semester: body.semester || DEFAULT_CONFIG.semester
+    };
+    await env.DATA.put('config', JSON.stringify(payload));
+    return new Response(JSON.stringify({ success: true, config: payload }), {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (err) {
