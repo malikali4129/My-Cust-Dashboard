@@ -12,13 +12,16 @@ export async function onRequestGet(context) {
     const exportData = {
       config,
       data: {},
+      history: {},
       exportedAt: new Date().toISOString(),
-      version: '1.0'
+      version: '2.0'
     };
     
     for (const cat of config.categories) {
       const items = await env.DATA.get(`data:${cat.id}`, { type: 'json' });
       exportData.data[cat.id] = items || [];
+      const hist = await env.DATA.get(`history:${cat.id}`, { type: 'json' });
+      if (hist && hist.length) exportData.history[cat.id] = hist;
     }
     
     return new Response(JSON.stringify(exportData, null, 2), {

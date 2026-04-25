@@ -7,14 +7,20 @@ export async function onRequestGet(context) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    
+
     const data = {};
     for (const cat of config.categories) {
       const items = await env.DATA.get(`data:${cat.id}`, { type: 'json' });
       data[cat.id] = items || [];
     }
-    
-    return new Response(JSON.stringify({ config, data }), {
+
+    // Also include history for assignments if category exists
+    const history = {};
+    if (config.categories.some(c => c.id === 'assignments')) {
+      history.assignments = (await env.DATA.get('history:assignments', { type: 'json' })) || [];
+    }
+
+    return new Response(JSON.stringify({ config, data, history }), {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (err) {
@@ -24,3 +30,4 @@ export async function onRequestGet(context) {
     });
   }
 }
+

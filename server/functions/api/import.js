@@ -26,6 +26,15 @@ export async function onRequestPost(context) {
         await env.DATA.put(`data:${key}`, JSON.stringify(value));
       }
     }
+
+    // Write history data if present
+    if (body.history && typeof body.history === 'object') {
+      for (const [key, value] of Object.entries(body.history)) {
+        if (Array.isArray(value)) {
+          await env.DATA.put(`history:${key}`, JSON.stringify(value));
+        }
+      }
+    }
     
     return new Response(JSON.stringify({ 
       success: true, 
